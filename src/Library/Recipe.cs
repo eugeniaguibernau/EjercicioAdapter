@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Full_GRASP_And_SOLID
 {
@@ -15,6 +16,8 @@ namespace Full_GRASP_And_SOLID
         private IList<BaseStep> steps = new List<BaseStep>();
 
         public Product FinalProduct { get; set; }
+        public bool HasStarted = false;
+        public bool Cooked { get; private set; } = false;
 
         // Agregado por Creator
         public void AddStep(Product input, double quantity, Equipment equipment, int time)
@@ -62,5 +65,40 @@ namespace Full_GRASP_And_SOLID
 
             return result;
         }
+
+
+        public int GetCookTime()
+        {
+            int time = 0;
+            foreach (var step in steps)
+            {
+                time += step.Time;
+            }
+            
+            return time;
+        }
+
+       
+
+        public void SetCooked()
+        {
+            Cooked = true;
+        }
+        
+        
+        public async void Cook()
+        {
+            if (HasStarted) // Evitar que se cocine más de una vez
+            {
+                throw new InvalidOperationException("La receta ya empezo a cocinarse");
+
+            }
+            Adaptador adaptador = new Adaptador(this);
+            int cookTime = GetCookTime();
+            await Task.Delay(cookTime);
+            HasStarted = true;
+            adaptador.TimeOut();
+        }
+
     }
 }
